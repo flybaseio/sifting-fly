@@ -1,0 +1,17 @@
+{
+  "name": "siftfly",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Roger Stringer <roger@datamcfly.com> (http://datamcfly.com/)",
+  "license": "ISC",
+  "dependencies": {
+    "finalhandler": "0.5.0",
+    "flybase": "1.7.8",
+    "serve-static": "1.11.1",
+    "siftninja": "1.0.0"
+  }
+}

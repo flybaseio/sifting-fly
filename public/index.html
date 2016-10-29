@@ -1,0 +1,39 @@
+<html>
+<head>
+	<title>Flybase and Sift Ninja</title>
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+	<br />
+	<div class="container well">
+		<h2>Enter Chat and press enter</h2>
+		<div class="form-group">
+			<input type="text" id="input" class="form-control" placeholder="Enter your message">
+		</div>
+		<hr />
+		<h3>Chat Output</h3>
+		<ul class="list-group" id="chatbox"></ul>
+	</div>
+	<script src="https://cdn.flybase.io/flybase.js"></script>
+	<script>
+		var flybase = new Flybase("<YOUR-FLYBASE-API-KEY>", "sift", "chat");
+
+		function $(id) { return document.getElementById(id); }
+        var box = $('chatbox'), input = $('input');
+
+		input.addEventListener('keyup', function(e) {
+			if ((e.keyCode || e.charCode) === 13) {
+				flybase.trigger('check_content', input.value);
+			}
+		});
+
+		flybase.on("results", function(data){
+			if( data.response ){
+                box.innerHTML = "<li class='list-group-item'>" + ('' + data.message).replace( /[<>]/g, '' ) + '</li>' + box.innerHTML;
+			}else{
+				box.innerHTML =  "<li class='list-group-item'>" + '&uarr; <em>Sift ninja found something bad!</em>' + '</li>' + box.innerHTML;
+			}
+		});
+	</script>
+</body>
+</html>

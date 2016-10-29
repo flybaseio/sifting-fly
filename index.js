@@ -4,18 +4,25 @@ var serveStatic = require('serve-static')
 var path = require('path');
 
 var flybase = require('flybase');
-var flybaseRef = flybase.init('sift', "chat", '<YOUR-FLYBASE-API-KEY>');
+var flybaseRef = flybase.init('siftninja', "chat", '<YOUR-FLYBASE-API-KEY>');
 
 var apikey = '<YOUR-SIFT-NINJA-API-KEY>';
 var url = '<YOUR-SIFT-NINJA-URL>';
-
 var siftninja = require("siftninja")(url, apikey);
 
-flybaseRef.on("check_content", function( message ) {
+flybaseRef.on("check_content", function( req ) {
+	var req = JSON.parse( req );
+	var message = req.message;
+	var sessionKey = req.session;
 	siftninja( message ).then(function(result) {
 		var result = result.body;
 		result.message = message;
-		flybaseRef.trigger( "results", result );
+		if( result.response ){
+			var text = ('' + message).replace( /[<>]/g, '' );
+			flybaseRef.push({text:text});
+		}else{
+			flybaseRef.trigger( "results_"+sessionKey, result );
+		}
 	});
 });
 

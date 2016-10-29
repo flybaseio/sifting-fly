@@ -8,7 +8,7 @@
 	<div class="container well">
 		<h2>Enter Chat and press enter</h2>
 		<div class="form-group">
-			<input type="text" id="input" class="form-control" placeholder="Enter your message">
+			<input type="text" id="input" class="form-control" placeholder="Enter your message" required>
 		</div>
 		<hr />
 		<h3>Chat Output</h3>
@@ -18,22 +18,52 @@
 	<script>
 		var flybase = new Flybase("<YOUR-FLYBASE-API-KEY>", "sift", "chat");
 
+		//	generate a unique session ID, this lets us set up a custom event listener only for this user.
+		if (sessionStorage.getItem("sessionKey")) {
+			var sessionKey = sessionStorage.getItem("sessionKey");
+		}else{
+			var sessionKey = uniqueID();
+			sessionStorage.setItem("sessionKey", sessionKey);
+		}
+
 		function $(id) { return document.getElementById(id); }
-        var box = $('chatbox'), input = $('input');
+        var box = $('chatbox'), input = $('input'), name = $('nameInput');
 
 		input.addEventListener('keyup', function(e) {
 			if ((e.keyCode || e.charCode) === 13) {
-				flybase.trigger('check_content', input.value);
+				flybase.trigger('check_content', {message:input.value,session:sessionKey});
 			}
 		});
 
-		flybase.on("results", function(data){
-			if( data.response ){
-                box.innerHTML = "<li class='list-group-item'>" + ('' + data.message).replace( /[<>]/g, '' ) + '</li>' + box.innerHTML;
-			}else{
-				box.innerHTML =  "<li class='list-group-item'>" + '&uarr; <em>Sift ninja found something bad!</em>' + '</li>' + box.innerHTML;
+		flybase.on("results_"+sessionKey, function(data){
+			if( !data.response ){
+				displayChatMessage( '&uarr; <strong>Sift ninja found something bad!</strong>' );
 			}
 		});
+
+		function displayChatMessage( str ){
+			box.innerHTML =  "<li class='list-group-item'>" + str + '</li>' + box.innerHTML;
+		}
+
+		flybase.once('value', function (data) {
+			if( data.count() ){
+				data.forEach( function(message){
+					displayChatMessage( message.value().text );
+				});
+			}
+		});
+
+		flybase.on('added', function (message) {
+			displayChatMessage( message.value().text );
+		});
+
+		//	handy function to return a unique ID everytime in the form of "3ade36ea-841d-bfca-4c33-6c8dd72e84cf"
+		function uniqueID(){
+			function chr4(){
+				return Math.random().toString(16).slice(-4);
+			}
+			return chr4() + chr4() + '-' + chr4() + '-' + chr4() + '-' + chr4() + '-' + chr4() + chr4() + chr4();
+		}
 	</script>
 </body>
 </html>
